@@ -1,8 +1,10 @@
 package concurrentStack
 
 import concurrentStack.stack.ConcurrentStack
+import concurrentStack.stack.IntStack
 import org.jetbrains.kotlinx.lincheck.annotations.Operation
 import org.jetbrains.kotlinx.lincheck.check
+import org.jetbrains.kotlinx.lincheck.strategy.managed.modelchecking.ModelCheckingOptions
 import org.jetbrains.kotlinx.lincheck.strategy.stress.StressOptions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -63,9 +65,12 @@ class ConcurrentStackStressTest {
 
     @Test
     fun stressTest() = StressOptions()
-        .threads(3)
-        .actorsPerThread(3)
-        .iterations(100)
-        .invocationsPerIteration(50000)
-        .check(this::class)
+        .sequentialSpecification(IntStack::class.java)
+        .check(this::class.java)
+
+    @Test
+    fun modelTest() = ModelCheckingOptions()
+        .checkObstructionFreedom()
+        .sequentialSpecification(IntStack::class.java)
+        .check(this::class.java)
 }

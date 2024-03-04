@@ -1,9 +1,10 @@
 package concurrentStack
 
 import concurrentStack.stack.ConcurrentEliminationStack
-import concurrentStack.stack.ConcurrentStack
+import concurrentStack.stack.IntStack
 import org.jetbrains.kotlinx.lincheck.annotations.Operation
 import org.jetbrains.kotlinx.lincheck.check
+import org.jetbrains.kotlinx.lincheck.strategy.managed.modelchecking.ModelCheckingOptions
 import org.jetbrains.kotlinx.lincheck.strategy.stress.StressOptions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -51,7 +52,9 @@ class ConcurrentEliminationStackTests {
 }
 
 class ConcurrentEliminationStackStressTest {
-    private val stack = ConcurrentEliminationStack<Int>()
+
+    // For some reason with bigger waitSteps lincheck detects block💀
+    private val stack = ConcurrentEliminationStack<Int>(waitSteps = 100)
 
     @Operation
     fun push(x: Int) = stack.push(x)
@@ -64,9 +67,12 @@ class ConcurrentEliminationStackStressTest {
 
     @Test
     fun stressTest() = StressOptions()
-        .threads(3)
-        .actorsPerThread(3)
-        .iterations(100)
-        .invocationsPerIteration(50000)
-        .check(this::class)
+        .sequentialSpecification(IntStack::class.java)
+        .check(this::class.java)
+
+    @Test
+    fun modelTest() = ModelCheckingOptions()
+        .checkObstructionFreedom()
+        .sequentialSpecification(IntStack::class.java)
+        .check(this::class.java)
 }

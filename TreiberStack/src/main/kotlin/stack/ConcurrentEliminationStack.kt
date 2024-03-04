@@ -6,7 +6,7 @@ import java.util.EmptyStackException
 import kotlin.random.Random
 
 
-class Wrapper<T>(val value: T)
+class Wrapper<T>(val value: T) {}
 
 class ConcurrentEliminationStack<T>(
     private val eliminationSize: Int = 10, private val waitSteps: Int = 1000
