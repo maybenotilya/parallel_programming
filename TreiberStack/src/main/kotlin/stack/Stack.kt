@@ -2,7 +2,7 @@ package concurrentStack.stack
 
 import java.util.EmptyStackException
 
-class IntStack<T> : StackInterface<Int> {
+class IntStack : StackInterface<Int> {
     private val stack = mutableListOf<Int>()
 
     override fun push(x: Int) {

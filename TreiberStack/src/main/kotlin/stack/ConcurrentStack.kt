@@ -3,7 +3,6 @@ package concurrentStack.stack
 import kotlinx.atomicfu.atomic
 import java.util.EmptyStackException
 
-
 class ConcurrentStack<T> : StackInterface<T> {
     private val head = atomic<StackNode<T>?>(null)
 

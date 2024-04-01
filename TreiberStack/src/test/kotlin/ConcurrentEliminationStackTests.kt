@@ -53,8 +53,7 @@ class ConcurrentEliminationStackTests {
 
 class ConcurrentEliminationStackStressTest {
 
-    // For some reason with bigger waitSteps lincheck detects block💀
-    private val stack = ConcurrentEliminationStack<Int>(waitSteps = 100)
+    private val stack = ConcurrentEliminationStack<Int>()
 
     @Operation
     fun push(x: Int) = stack.push(x)

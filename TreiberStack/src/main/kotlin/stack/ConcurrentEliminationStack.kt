@@ -9,7 +9,7 @@ import kotlin.random.Random
 class Wrapper<T>(val value: T) {}
 
 class ConcurrentEliminationStack<T>(
-    private val eliminationSize: Int = 10, private val waitSteps: Int = 1000
+    private val eliminationSize: Int = 10, private val waitSteps: Int = 50
 ) : StackInterface<T> {
     private val head = atomic<StackNode<T>?>(null)
     private val eliminationArray = atomicArrayOfNulls<Wrapper<T>?>(eliminationSize)
