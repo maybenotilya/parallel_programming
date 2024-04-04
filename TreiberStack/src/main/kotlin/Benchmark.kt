@@ -125,6 +125,7 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
+                    pushMany(concurrentStack, noperations)
                     for (j in 0..<njobs) {
                         if (j % 2 == 0) {
                             launch { popMany(concurrentStack, noperations) }.join()
@@ -140,6 +141,7 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
+                    pushMany(eliminationStack, noperations)
                     for (j in 0..<njobs) {
                         if (j % 2 == 0) {
                             launch { popMany(eliminationStack, noperations) }.join()

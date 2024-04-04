@@ -3,7 +3,7 @@ package concurrentStack
 fun main() {
     val nruns = 5
     val noperations = 5_000_000
-    val waitSteps = 1000
+    val waitSteps = 100
     val njobs = 2
     val bench = Benchmark()
 
