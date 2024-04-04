@@ -2,12 +2,9 @@ package concurrentStack
 
 import concurrentStack.stack.ConcurrentEliminationStack
 import concurrentStack.stack.ConcurrentStack
-import concurrentStack.stack.IntStack
 import concurrentStack.stack.StackInterface
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.Stack
 import kotlin.system.measureTimeMillis
 
 class Benchmark {
@@ -40,8 +37,8 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
-                    for (i in 0..<njobs) {
-                        if (i % 2 == 0) {
+                    for (j in 0..<njobs) {
+                        if (j % 2 == 0) {
                             launch { pushMany(concurrentStack, noperations) }.join()
                         } else {
                             launch { popMany(concurrentStack, noperations) }.join()
@@ -55,8 +52,8 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
-                    for (i in 0..<njobs) {
-                        if (i % 2 == 0) {
+                    for (j in 0..<njobs) {
+                        if (j % 2 == 0) {
                             launch { pushMany(eliminationStack, noperations) }.join()
                         } else {
                             launch { popMany(eliminationStack, noperations) }.join()
@@ -84,8 +81,8 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
-                    for (i in 0..<njobs) {
-                        if (i % 2 == 0) {
+                    for (j in 0..<njobs) {
+                        if (j % 2 == 0) {
                             launch { pushMany(concurrentStack, noperations) }.join()
                         } else {
                             launch { pushMany(concurrentStack, noperations) }.join()
@@ -99,8 +96,8 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
-                    for (i in 0..<njobs) {
-                        if (i % 2 == 0) {
+                    for (j in 0..<njobs) {
+                        if (j % 2 == 0) {
                             launch { pushMany(eliminationStack, noperations) }.join()
                         } else {
                             launch { pushMany(eliminationStack, noperations) }.join()
@@ -128,8 +125,8 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
-                    for (i in 0..<njobs) {
-                        if (i % 2 == 0) {
+                    for (j in 0..<njobs) {
+                        if (j % 2 == 0) {
                             launch { popMany(concurrentStack, noperations) }.join()
                         } else {
                             launch { popMany(concurrentStack, noperations) }.join()
@@ -143,8 +140,8 @@ class Benchmark {
         for (i in 0..<nruns) {
             val t: Long = runBlocking {
                 measureTimeMillis {
-                    for (i in 0..<njobs) {
-                        if (i % 2 == 0) {
+                    for (j in 0..<njobs) {
+                        if (j % 2 == 0) {
                             launch { popMany(eliminationStack, noperations) }.join()
                         } else {
                             launch { popMany(eliminationStack, noperations) }.join()
