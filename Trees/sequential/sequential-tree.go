@@ -12,84 +12,95 @@ type Tree struct {
 	root *Node
 }
 
-func insert(node *Node, x int) {
-	if node.val == x {
-		return
+func (tree *Tree) findHelper(x int) (*Node, *Node) {
+	if tree.root == nil {
+		return nil, nil
 	}
-	if x < node.val {
-		if node.left == nil {
-			node.left = &Node{val: x}
+	curr := tree.root
+	var prev *Node = nil
+	for curr != nil && curr.val != x {
+		prev = curr
+		if x < curr.val {
+			curr = curr.left
 		} else {
-			insert(node.left, x)
+			curr = curr.right
 		}
 	}
-	if x > node.val {
-		if node.right == nil {
-			node.right = &Node{val: x}
-		} else {
-			insert(node.right, x)
-		}
-	}
+	return curr, prev
 }
 
 func (tree *Tree) Insert(x int) {
+	curr, prev := tree.findHelper(x)
 	if tree.root == nil {
 		tree.root = &Node{val: x}
 		return
 	}
-	insert(tree.root, x)
-}
-
-func find(node *Node, x int) bool {
-	if node == nil {
-		return false
+	if curr != nil {
+		return
 	}
-	if x < node.val {
-		return find(node.left, x)
+	node := &Node{val: x}
+	if x < prev.val {
+		prev.left = node
+	} else {
+		prev.right = node
 	}
-	if x > node.val {
-		return find(node.right, x)
-	}
-	return true
 }
 
 func (tree *Tree) Find(x int) bool {
-	return find(tree.root, x)
-}
-
-func remove(node *Node, x int) *Node {
-	if node == nil {
-		return nil
-	}
-	if x < node.val {
-		node.left = remove(node.left, x)
-		return node
-	}
-	if x > node.val {
-		node.right = remove(node.right, x)
-		return node
-	}
-
-	if node.left == nil && node.right == nil {
-		return nil
-	}
-	if node.left == nil {
-		return node.right
-	}
-	if node.right == nil {
-		return node.left
-	}
-	succ := node.right
-	for succ.left != nil {
-		succ = succ.left
-	}
-	node.val = succ.val
-	node.right = remove(node.right, node.val)
-	return node
+	curr, _ := tree.findHelper(x)
+	return curr != nil
 }
 
 func (tree *Tree) Remove(x int) {
-	remove(tree.root, x)
+	curr, prev := tree.findHelper(x)
+	if curr == nil {
+		return
+	}
+
+	if curr.left == nil && curr.right == nil {
+		if curr == tree.root {
+			tree.root = nil
+		} else if curr.val < prev.val {
+			prev.left = nil
+		} else {
+			prev.right = nil
+		}
+		return
+	}
+
+	if curr.left == nil {
+		if curr == tree.root {
+			tree.root = curr.right
+		} else if curr.val < prev.val {
+			prev.left = curr.right
+		} else {
+			prev.right = curr.right
+		}
+		return
+	}
+
+	if curr.right == nil {
+		if curr == tree.root {
+			tree.root = curr.left
+		} else if curr.val < prev.val {
+			prev.left = curr.left
+		} else {
+			prev.right = curr.left
+		}
+		return
+	}
+	succ_parent := curr
+	succ := curr.right
+	for succ.left != nil {
+		succ_parent = succ
+		succ = succ.left
+	}
+	if succ_parent != curr {
+		succ_parent.left = succ.right
+	} else {
+		succ_parent.right = succ.right
+	}
+	curr.val = succ.val
 }
 
 func inOrderPrint(node *Node) {
@@ -106,6 +117,27 @@ func (tree *Tree) InOrderPrint() {
 	fmt.Println()
 }
 
-func NewTree() Tree {
-	return Tree{}
+func isValid(node *Node) bool {
+	if node == nil {
+		return true
+	}
+	if node.left != nil && node.left.val >= node.val {
+		return false
+	}
+	if node.right != nil && node.right.val <= node.val {
+		return false
+	}
+	return isValid(node.left) && isValid(node.right)
+}
+
+func (tree *Tree) IsValid() bool {
+	return isValid(tree.root)
+}
+
+func (tree *Tree) IsEmpty() bool {
+	return tree.root == nil
+}
+
+func NewTree() *Tree {
+	return &Tree{}
 }

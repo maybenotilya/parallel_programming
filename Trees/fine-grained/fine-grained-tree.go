@@ -64,20 +64,6 @@ func (tree *Tree) findHelper(x int) (*Node, *Node) {
 	return curr, prev
 }
 
-func (tree *Tree) Find(x int) bool {
-	curr, prev := tree.findHelper(x)
-	if prev == nil {
-		defer tree.unlock_tree()
-	} else {
-		defer prev.unlock()
-	}
-	if curr != nil {
-		defer curr.unlock()
-		return true
-	}
-	return false
-}
-
 func (tree *Tree) Insert(x int) {
 	curr, prev := tree.findHelper(x)
 	if tree.root == nil {
@@ -100,6 +86,20 @@ func (tree *Tree) Insert(x int) {
 	} else {
 		prev.right = node
 	}
+}
+
+func (tree *Tree) Find(x int) bool {
+	curr, prev := tree.findHelper(x)
+	if prev == nil {
+		defer tree.unlock_tree()
+	} else {
+		defer prev.unlock()
+	}
+	if curr != nil {
+		defer curr.unlock()
+		return true
+	}
+	return false
 }
 
 func (tree *Tree) Remove(x int) {
@@ -167,6 +167,7 @@ func (tree *Tree) Remove(x int) {
 	curr.val = succ.val
 }
 
+// Seems like it is optimal to lock one node only
 func inOrderPrint(node *Node) {
 	if node == nil {
 		return
@@ -183,6 +184,39 @@ func (tree *Tree) InOrderPrint() {
 	fmt.Println()
 }
 
-func NewTree() Tree {
-	return Tree{}
+func isValid(node *Node) bool {
+	//At this point node is locked, owverwise deadlock is possible
+	if node == nil {
+		return true
+	}
+	if node.left != nil {
+		node.left.lock()
+	}
+	if node.right != nil {
+		node.right.lock()
+	}
+	defer node.unlock()
+	if node.left != nil && node.left.val >= node.val {
+		return false
+	}
+	if node.right != nil && node.right.val <= node.val {
+		return false
+	}
+	return isValid(node.left) && isValid(node.right)
+}
+
+func (tree *Tree) IsValid() bool {
+	if tree.root == nil {
+		return true
+	}
+	tree.root.lock()
+	return isValid(tree.root)
+}
+
+func (tree *Tree) IsEmpty() bool {
+	return tree.root == nil
+}
+
+func NewTree() *Tree {
+	return &Tree{}
 }
