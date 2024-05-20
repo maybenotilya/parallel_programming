@@ -1,6 +1,9 @@
 package finegrained
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Node struct {
 	mutex sync.Mutex
@@ -109,10 +112,11 @@ func (tree *Tree) Remove(x int) {
 	if curr == nil {
 		return
 	}
-	defer curr.unlock()
 
 	if curr.left == nil && curr.right == nil {
-		if curr.val < prev.val {
+		if curr == tree.root {
+			tree.root = nil
+		} else if curr.val < prev.val {
 			prev.left = nil
 		} else {
 			prev.right = nil
@@ -121,7 +125,9 @@ func (tree *Tree) Remove(x int) {
 	}
 
 	if curr.left == nil {
-		if curr.val < prev.val {
+		if curr == tree.root {
+			tree.root = curr.right
+		} else if curr.val < prev.val {
 			prev.left = curr.right
 		} else {
 			prev.right = curr.right
@@ -130,13 +136,16 @@ func (tree *Tree) Remove(x int) {
 	}
 
 	if curr.right == nil {
-		if curr.val < prev.val {
+		if curr == tree.root {
+			tree.root = curr.left
+		} else if curr.val < prev.val {
 			prev.left = curr.left
 		} else {
 			prev.right = curr.left
 		}
 		return
 	}
+	defer curr.unlock()
 	curr.right.lock()
 	succ_parent := curr
 	succ := curr.right
@@ -145,7 +154,7 @@ func (tree *Tree) Remove(x int) {
 		succ_parent = succ
 		succ.left.lock()
 		succ = succ.left
-		if temp != nil {
+		if temp != nil && temp != curr {
 			temp.unlock()
 		}
 	}
@@ -156,6 +165,22 @@ func (tree *Tree) Remove(x int) {
 		succ_parent.right = succ.right
 	}
 	curr.val = succ.val
+}
+
+func inOrderPrint(node *Node) {
+	if node == nil {
+		return
+	}
+	node.lock()
+	defer node.unlock()
+	inOrderPrint(node.left)
+	fmt.Print(node.val, " ")
+	inOrderPrint(node.right)
+}
+
+func (tree *Tree) InOrderPrint() {
+	inOrderPrint(tree.root)
+	fmt.Println()
 }
 
 func NewTree() Tree {

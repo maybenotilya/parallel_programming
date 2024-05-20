@@ -79,11 +79,11 @@ func remove(node *Node, x int) *Node {
 	if node.right == nil {
 		return node.left
 	}
-	right_min_node := node.right
-	for right_min_node.left != nil {
-		right_min_node = right_min_node.left
+	succ := node.right
+	for succ.left != nil {
+		succ = succ.left
 	}
-	node.val = right_min_node.val
+	node.val = succ.val
 	node.right = remove(node.right, node.val)
 	return node
 }
@@ -103,6 +103,7 @@ func inOrderPrint(node *Node) {
 
 func (tree *Tree) InOrderPrint() {
 	inOrderPrint(tree.root)
+	fmt.Println()
 }
 
 func NewTree() Tree {
