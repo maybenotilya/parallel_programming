@@ -27,7 +27,7 @@ func init() {
 	rnd = rand.New(rand.NewSource(seed))
 	values = make([]int, number_size)
 	for i := range values {
-		values[i] = rnd.Intn(1000)
+		values[i] = rnd.Int()
 	}
 }
 
@@ -115,7 +115,8 @@ func TestBST(t *testing.T) {
 				wg.Add(1)
 				go func(x int) {
 					defer wg.Done()
-					op := rnd.Intn(100)
+					rnd := rand.New(rand.NewSource(int64(x)))
+					op := rnd.Int()
 					if op%3 == 0 {
 						tree.Insert(x)
 					} else if op%3 == 1 {
