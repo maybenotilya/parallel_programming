@@ -1,7 +1,6 @@
-package finegrained
+package optimistic
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -33,35 +32,62 @@ func (tree *Tree) unlock_tree() {
 	tree.mutex.Unlock()
 }
 
-func (tree *Tree) findHelper(x int) (*Node, *Node) {
-	tree.lock_tree()
-	if tree.root == nil {
-		return nil, nil
+func (tree *Tree) validate(x int, node, parent *Node) bool {
+	if node == nil && parent == nil {
+		return tree.root == nil
 	}
-	tree.root.lock()
 	curr := tree.root
 	var prev *Node = nil
-	for curr != nil && curr.val != x {
-		temp := prev
+	for curr != nil && curr.val != x && curr != node {
 		prev = curr
 		if x < curr.val {
-			if curr.left != nil {
-				curr.left.lock()
-			}
 			curr = curr.left
 		} else {
-			if curr.right != nil {
-				curr.right.lock()
-			}
 			curr = curr.right
 		}
-		if temp == nil {
-			tree.unlock_tree()
-		} else {
-			temp.unlock()
+	}
+	return curr == node && prev == parent
+}
+
+func (tree *Tree) findHelper(x int) (*Node, *Node) {
+	for {
+		tree.lock_tree()
+		if tree.root == nil {
+			return nil, nil
+		}
+		curr := tree.root
+		var prev *Node = nil
+		for curr != nil && curr.val != x {
+			temp := prev
+			prev = curr
+			if x < curr.val {
+				curr = curr.left
+			} else {
+				curr = curr.right
+			}
+			if temp == nil {
+				tree.unlock_tree()
+			}
+		}
+
+		if prev != nil {
+			prev.lock()
+		}
+		if curr != nil {
+			curr.lock()
+		}
+
+		if tree.validate(x, curr, prev) {
+			return curr, prev
+		}
+
+		if curr != nil {
+			curr.unlock()
+		}
+		if prev != nil {
+			prev.unlock()
 		}
 	}
-	return curr, prev
 }
 
 func (tree *Tree) Insert(x int) {
@@ -112,6 +138,7 @@ func (tree *Tree) Remove(x int) {
 	if curr == nil {
 		return
 	}
+	defer curr.unlock()
 
 	if curr.left == nil && curr.right == nil {
 		if curr == tree.root {
@@ -145,7 +172,7 @@ func (tree *Tree) Remove(x int) {
 		}
 		return
 	}
-	defer curr.unlock()
+
 	curr.right.lock()
 	succ_parent := curr
 	succ := curr.right
@@ -158,6 +185,8 @@ func (tree *Tree) Remove(x int) {
 			temp.unlock()
 		}
 	}
+
+	defer succ.unlock()
 	if succ_parent != curr {
 		defer succ_parent.unlock()
 		succ_parent.left = succ.right
@@ -167,35 +196,11 @@ func (tree *Tree) Remove(x int) {
 	curr.val = succ.val
 }
 
-// Seems like it is optimal to lock one node only
-func inOrderPrint(node *Node) {
-	if node == nil {
-		return
-	}
-	node.lock()
-	defer node.unlock()
-	inOrderPrint(node.left)
-	fmt.Print(node.val, " ")
-	inOrderPrint(node.right)
-}
-
-func (tree *Tree) InOrderPrint() {
-	inOrderPrint(tree.root)
-	fmt.Println()
-}
-
+// IsValid and IsEmpty does not support optimistic-lock semantic, so they are purely sequential
 func isValid(node *Node) bool {
-	//At this point node is locked, overwise deadlock is possible
 	if node == nil {
 		return true
 	}
-	if node.left != nil {
-		node.left.lock()
-	}
-	if node.right != nil {
-		node.right.lock()
-	}
-	defer node.unlock()
 	if node.left != nil && node.left.val >= node.val {
 		return false
 	}
@@ -206,10 +211,6 @@ func isValid(node *Node) bool {
 }
 
 func (tree *Tree) IsValid() bool {
-	if tree.root == nil {
-		return true
-	}
-	tree.root.lock()
 	return isValid(tree.root)
 }
 
