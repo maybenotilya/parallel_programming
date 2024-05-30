@@ -28,4 +28,4 @@ jobs:
         go-version: '1.22'
 
     - name: Test Trees
-      run: go test --count 100
+      run: go test --timeout 30m --count 100

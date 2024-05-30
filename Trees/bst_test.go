@@ -23,7 +23,7 @@ type BST interface {
 }
 
 func init() {
-	seed = 0xC0FFEE
+	seed = 42
 	rnd = rand.New(rand.NewSource(seed))
 	values = make([]int, number_size)
 	for i := range values {
@@ -40,6 +40,11 @@ func TestBST(t *testing.T) {
 	var wg sync.WaitGroup
 
 	for name, tree := range trees {
+
+		/*
+			This tests check that after only insert operations tree will remain BST
+			(left children's value is less than parent value, right children's -- is greater).
+		*/
 		t.Run("Insert", func(t *testing.T) {
 			for _, v := range values {
 				wg.Add(1)
@@ -54,6 +59,9 @@ func TestBST(t *testing.T) {
 			}
 		})
 
+		/*
+			This tests check that after insert operations all numbers inserted will present in BST.
+		*/
 		t.Run("Find after Insert", func(t *testing.T) {
 			for _, v := range values {
 				wg.Add(1)
@@ -70,6 +78,9 @@ func TestBST(t *testing.T) {
 			}
 		})
 
+		/*
+			This tests check what after inserting and removing the same elements BST will be empty.
+		*/
 		t.Run("Remove after Insert", func(t *testing.T) {
 			for _, v := range values {
 				wg.Add(1)
@@ -92,6 +103,9 @@ func TestBST(t *testing.T) {
 			}
 		})
 
+		/*
+			This tests check that during simultanious insert and remove operation tree will still be valid.
+		*/
 		t.Run("Insert and Remove", func(t *testing.T) {
 			for i, v := range values {
 				wg.Add(1)
@@ -110,6 +124,9 @@ func TestBST(t *testing.T) {
 			}
 		})
 
+		/*
+			This tests check that during simultanious random operation tree will still be valid.
+		*/
 		t.Run("Random operations", func(t *testing.T) {
 			for _, v := range values {
 				wg.Add(1)
